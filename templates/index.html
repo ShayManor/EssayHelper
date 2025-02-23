@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essay Helper</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4A90E2;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .editor-section, .feedback-section {
+            background-color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .editor-section h2, .feedback-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        .buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #357ABD;
+        }
+        .feedback-section p {
+            white-space: pre-wrap;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #4A90E2;
+            border-radius: 4px;
+            color: #555;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4A90E2;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #777;
+            font-size: 14px;
+        }
+        @media (max-width: 600px) {
+            .buttons {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Essay Helper</h1>
+    </header>
+    <div class="container">
+        <section class="editor-section">
+            <h2>Your Essay</h2>
+            <textarea id="essay-input" placeholder="Type or paste your essay here..."></textarea>
+            <div class="buttons">
+                <button id="load-example">Load Example Essay</button>
+                <button id="get-feedback">Get Feedback</button>
+                <div class="loader" id="loader"></div>
+            </div>
+        </section>
+        <section class="feedback-section">
+            <h2>Feedback</h2>
+            <p id="feedback-output">Your feedback will appear here...</p>
+        </section>
+    </div>
+    <footer>
+        &copy; 2023 Essay Helper. All rights reserved.
+    </footer>
+    <script>
+        const loadExampleBtn = document.getElementById('load-example');
+        const getFeedbackBtn = document.getElementById('get-feedback');
+        const essayInput = document.getElementById('essay-input');
+        const feedbackOutput = document.getElementById('feedback-output');
+        const loader = document.getElementById('loader');
+
+        loadExampleBtn.addEventListener('click', async () => {
+            try {
+                loader.style.display = 'inline-block';
+                const response = await fetch('http://localhost:5000/example');
+                const data = await response.json();
+                essayInput.value = data.example;
+            } catch (error) {
+                feedbackOutput.textContent = 'Error loading example essay.';
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+
+        getFeedbackBtn.addEventListener('click', async () => {
+            const essay = essayInput.value.trim();
+            if (!essay) {
+                feedbackOutput.textContent = 'Please enter an essay to get feedback.';
+                return;
+            }
+            try {
+                loader.style.display = 'inline-block';
+                feedbackOutput.textContent = 'Generating feedback...';
+                const response = await fetch('http://localhost:5000/process_essay', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ essay })
+                });
+                const data = await response.json();
+                feedbackOutput.textContent = data.feedback || 'No feedback received.';
+            } catch (error) {
+                feedbackOutput.textContent = 'Error fetching feedback.';
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
