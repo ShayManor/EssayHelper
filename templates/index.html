@@ -133,7 +133,7 @@
         loadExampleBtn.addEventListener('click', async () => {
             try {
                 loader.style.display = 'inline-block';
-                const response = await fetch('http://localhost:5000/example');
+                const response = await fetch('/example');
                 const data = await response.json();
                 essayInput.value = data.example;
             } catch (error) {
@@ -152,7 +152,7 @@
             try {
                 loader.style.display = 'inline-block';
                 feedbackOutput.textContent = 'Generating feedback...';
-                const response = await fetch('http://localhost:5000/process_essay', {
+                const response = await fetch('/process_essay', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
